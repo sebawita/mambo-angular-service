@@ -1,0 +1,40 @@
+{
+  "name": "mambo-angular-service",
+  "version": "0.0.1",
+  "description": "Angular Service to control Parrot Mambo drone",
+  "main": "index.js",
+  "typings": "index",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preparedemo": "tsc && cd demo && npm install mambo-angular-service && cd .."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebawita/mambo-angular-service.git"
+  },
+  "keywords": [
+    "Angular",
+    "Bluetooth",
+    "Drone"
+  ],
+  "author": "Sebastian Witalec",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sebawita/mambo-angular-service/issues"
+  },
+  "homepage": "https://github.com/sebawita/mambo-angular-service#readme",
+  "dependencies": {
+    "@angular/common": "^4.0.0",
+    "@angular/compiler": "^4.0.0",
+    "@angular/core": "^4.0.0",
+    "@angular/forms": "^4.0.0",
+    "@angular/http": "^4.0.0",
+    "@angular/platform-browser": "^4.0.0",
+    "@angular/platform-browser-dynamic": "^4.0.0",
+    "rxjs": "^5.1.0",
+    "zone.js": "^0.8.4"
+  },
+  "devDependencies": {
+    "@types/web-bluetooth": "0.0.2"
+  }
+}

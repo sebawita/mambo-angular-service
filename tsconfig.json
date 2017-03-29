@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "declaration": true,
+    "experimentalDecorators": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "files": [
+    "index.ts",
+    "drone.ts",
+    "codes.ts",
+    "mambo.service.ts",
+    "drone-characteristic"
+  ]
+}

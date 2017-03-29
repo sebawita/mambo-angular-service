@@ -1,0 +1,16 @@
+<h1>
+  {{title}}
+</h1>
+
+<button (click)="search()">Search</button>
+
+<button (click)="takeOff()">Take Off</button>
+<button (click)="land()">Land</button>
+
+<h1>Speed: {{speed}}</h1>
+
+<h3>Roll: {{drone?.roll}}</h3>
+<h3>Pitch: {{drone?.pitch}}</h3>
+<h3>Yaw: {{drone?.yaw}}</h3>
+<h3>Altitude: {{drone?.altitude}}</h3>
+
