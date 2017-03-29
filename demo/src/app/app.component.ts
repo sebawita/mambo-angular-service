@@ -10,7 +10,6 @@ import { MamboService, Drone } from 'mambo-angular-service';
 export class AppComponent {
   title = 'app works!';
 
-  ready = false;
   drone: Drone;
   speed = 0.5;
 
@@ -19,20 +18,7 @@ export class AppComponent {
 
   search() {
     this.mamboService.search()
-    .then((drone) => {
-      console.log('Ready to connect');
-      this.drone = drone;
-
-      // this.connect();
-    } );
-  }
-
-  connect() {
-    this.drone.connect()
-    .then(() => {
-      console.log('Ready to fly');
-      this.ready = true;
-    });
+    .then((drone) => this.drone = drone);
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -127,6 +113,9 @@ export class AppComponent {
       case 'arrowup':
       case 'arrowdown':
         this.drone.setAltitude(0);
+        break;
+      case 'f':
+        this.drone.fire();
         break;
     }
   }
