@@ -15,6 +15,7 @@ export declare class Drone {
     constructor(server: BluetoothRemoteGATTServer);
     connect(): Promise<any>;
     private initialiseFlightDefaults();
+    onDisconnected(): void;
     /**
      * Convenience method for setting the drone's altitude limitation
      * @param  {Integer} altitude the altitude in meters (2m-10m for Airborne Cargo / 2m - 25m for Mambo)
@@ -39,6 +40,10 @@ export declare class Drone {
     private stopFlightLoop();
     takeOff(): void;
     land(): void;
+    /**
+     * Instructs the drone to fire the cannon
+     */
+    fire(): void;
     private sendFlightParams();
     updateFlightParams(roll: number, pitch: number, yaw: number, altitude: number): void;
     /**

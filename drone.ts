@@ -48,24 +48,23 @@ export class Drone  {
   }
 
   private async initialiseFlightDefaults(): Promise<any> {
-        // info: Setting max altitude to 2m
-    const maxAltitudeCommand = [8, 0, 0, 2, 0];
-
+    // info: Setting max altitude to 2m
+    await this.setMaxAltitude(2);
+    
     // info: Setting max tilt to 40% (20° max)
-    const maxTiltCommand = [8, 1, 0, 40, 0];
-
+    await this.setMaxTilt(40);
+    
     // info: Setting max vertical speed to 0.5 m/s
-    const maxVerticalSpeedCommand = [1, 0, 0, 0, 0];
+    await this.setMaxVerticalSpeed(0);
 
     // info: Setting max rotation speed to 150 °/s
-    const maxRotationCommand = [1, 1, 0, 150, 0];
-
-    await this.flightCommandInstructions.write(maxAltitudeCommand);
-    await this.flightCommandInstructions.write(maxTiltCommand);
-    await this.flightCommandInstructions.write(maxVerticalSpeedCommand);
-    await this.flightCommandInstructions.write(maxRotationCommand);
+    await this.setMaxRotationSpeed(150);
   }
 
+  onDisconnected() {
+    console.log('Drone disconnected');
+    this.stopFlightLoop();
+  }
   
   /**
    * Convenience method for setting the drone's altitude limitation
@@ -179,6 +178,13 @@ export class Drone  {
     this.pitch = 0;
     this.yaw = 0;
     this.altitude = 0;
+  }
+
+  /**
+   * Instructs the drone to fire the cannon
+   */
+  public fire() {
+    this.flightCommandInstructions.writeWithoutResponse([16, 2, 0, 0, 0, 0, 0, 0]);
   }
 
   private sendFlightParams() {
