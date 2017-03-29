@@ -16,11 +16,16 @@ export class MamboService {
     });
 
     const server: BluetoothRemoteGATTServer = await device.gatt.connect();
+    
+    console.log('Drone ready to connect');
 
     const drone = new Drone(server);
     await drone.connect();
 
+    console.log('Drone connected and ready to fly');
+
+    device.addEventListener('gattserverdisconnected', () => drone.onDisconnected());
+
     return drone;
   }
-
 }
