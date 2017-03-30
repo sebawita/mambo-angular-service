@@ -1,6 +1,7 @@
 /// <reference types="web-bluetooth" />
+import { Observable } from 'rxjs';
 export declare class Drone {
-    private server;
+    private device;
     private flightCommandInstructions;
     private flightParamsInstructions;
     private flightStatus;
@@ -12,10 +13,14 @@ export declare class Drone {
     private flightLoopHandle;
     private loopHandle;
     private ready;
-    constructor(server: BluetoothRemoteGATTServer);
+    private connectionSubject;
+    readonly connection$: Observable<boolean>;
+    constructor(device: BluetoothDevice);
     connect(): Promise<any>;
+    private prepareCharacteristics(server);
     private initialiseFlightDefaults();
-    onDisconnected(): void;
+    private listenToOnDisconnected();
+    private onDisconnected();
     /**
      * Convenience method for setting the drone's altitude limitation
      * @param  {Integer} altitude the altitude in meters (2m-10m for Airborne Cargo / 2m - 25m for Mambo)

@@ -1,6 +1,6 @@
 declare var require: any;
 
-import { Observable, BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 import { MamboUUIDs, DroneCharacteristic } from '.';
 
@@ -26,25 +26,41 @@ export class Drone  {
   private loopHandle: number;
   private ready: boolean = false;
 
-  constructor(private server: BluetoothRemoteGATTServer) {
+  private connectionSubject: Subject<boolean>;
+
+  get connection$(): Observable<boolean> {
+    return this.connectionSubject;
+  }
+
+  constructor(private device: BluetoothDevice) {
   }
 
   public async connect(): Promise<any> {
-    const serviceA = await this.server.getPrimaryService(MamboUUIDs.serviceUUIDa);
-    const serviceB = await this.server.getPrimaryService(MamboUUIDs.serviceUUIDb);
+    this.connectionSubject = new Subject<boolean>();
+
+    const server: BluetoothRemoteGATTServer = await this.device.gatt.connect();
+
+    await this.prepareCharacteristics(server);
+
+    await this.initialiseFlightDefaults();
+    this.startFlightLoop();
+
+    this.listenToOnDisconnected();
+
+    await this.flightStatus.startNotifications();
+
+    this.connectionSubject.next(true);
+    console.log('Drone connected and ready to fly');
+  }
+
+  private async prepareCharacteristics(server: BluetoothRemoteGATTServer) {
+    const serviceA = await server.getPrimaryService(MamboUUIDs.serviceUUIDa);
+    const serviceB = await server.getPrimaryService(MamboUUIDs.serviceUUIDb);
 
     this.flightCommandInstructions = new DroneCharacteristic(await serviceA.getCharacteristic(MamboUUIDs.characteristic_command_instructions));
     this.flightParamsInstructions = new DroneCharacteristic(await serviceA.getCharacteristic(MamboUUIDs.characteristic_flight_params));
 
     this.flightStatus = await serviceB.getCharacteristic(MamboUUIDs.characteristic_flightStatus);
-
-    await this.initialiseFlightDefaults();
-
-    this.startFlightLoop();
-
-    await this.flightStatus.startNotifications();
-
-    this.ready = true;
   }
 
   private async initialiseFlightDefaults(): Promise<any> {
@@ -61,9 +77,15 @@ export class Drone  {
     await this.setMaxRotationSpeed(150);
   }
 
-  onDisconnected() {
+  private listenToOnDisconnected() {
+    this.device.addEventListener('gattserverdisconnected', () => this.onDisconnected());
+  }
+
+  private onDisconnected() {
     console.log('Drone disconnected');
     this.stopFlightLoop();
+
+    this.connectionSubject.complete();
   }
   
   /**
