@@ -10,15 +10,26 @@ import { MamboService, Drone } from 'mambo-angular-service';
 export class AppComponent {
   title = 'app works!';
 
+  ready = false;
   drone: Drone;
   speed = 0.5;
 
   constructor(private mamboService: MamboService) {
   }
 
-  search() {
-    this.mamboService.search()
-    .then((drone) => this.drone = drone);
+  public async search() {
+    this.drone = await this.mamboService.search();
+
+    this.drone.connection$
+    .subscribe(
+      () => this.ready,
+      err => console.error('Something went wrong: ' + JSON.stringify(err)),
+      () => {
+        alert('Drone is no longer connected');
+        this.drone = null;
+        this.ready = false;
+      }
+    );
   }
 
   @HostListener('window:keydown', ['$event'])
