@@ -1,30 +1,25 @@
 import { Injectable, NgModule, forwardRef, Inject } from '@angular/core';
 
-import {Drone, MamboUUIDs} from '.';
+import { Drone, MamboUUIDs } from '.';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable()
 export class MamboService {
 
   constructor() {
   }
-  
-  async search(): Promise<Drone> {
+
+
+  public async search(): Promise<Drone> {
     const device: BluetoothDevice = await navigator.bluetooth.requestDevice(
     {
       filters: [{ namePrefix: 'Mambo' }],
       optionalServices: MamboUUIDs.services
     });
+    console.log('Connecting to drone...');
 
-    const server: BluetoothRemoteGATTServer = await device.gatt.connect();
-    
-    console.log('Drone ready to connect');
-
-    const drone = new Drone(server);
-    await drone.connect();
-
-    console.log('Drone connected and ready to fly');
-
-    device.addEventListener('gattserverdisconnected', () => drone.onDisconnected());
+    const drone = new Drone(device);
+    drone.connect();
 
     return drone;
   }
