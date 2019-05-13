@@ -17,10 +17,10 @@ export declare class Drone {
     readonly connection$: Observable<boolean>;
     constructor(device: BluetoothDevice);
     connect(): Promise<any>;
-    private prepareCharacteristics(server);
-    private initialiseFlightDefaults();
-    private listenToOnDisconnected();
-    private onDisconnected();
+    private prepareCharacteristics;
+    private initialiseFlightDefaults;
+    private listenToOnDisconnected;
+    private onDisconnected;
     /**
      * Convenience method for setting the drone's altitude limitation
      * @param  {Integer} altitude the altitude in meters (2m-10m for Airborne Cargo / 2m - 25m for Mambo)
@@ -41,15 +41,15 @@ export declare class Drone {
      * @param  {integer} tilt The max rotation speed from (50°-360° for Airborne Cargo / 50° - 180° for Mambo)
      */
     setMaxRotationSpeed(maxRotationSpeed: number): Promise<any>;
-    private startFlightLoop();
-    private stopFlightLoop();
+    private startFlightLoop;
+    private stopFlightLoop;
     takeOff(): void;
     land(): void;
     /**
      * Instructs the drone to fire the cannon
      */
     fire(): void;
-    private sendFlightParams();
+    private sendFlightParams;
     updateFlightParams(roll: number, pitch: number, yaw: number, altitude: number): void;
     /**
      * Sets the roll speed of drone's flight params
@@ -71,7 +71,7 @@ export declare class Drone {
      * @param altitude turn speed, expected value from -1 (move down) to 1 (move up)
      */
     setAltitude(altitude: any): void;
-    private convertToInputValue(value);
-    private ensureBoundaries(val, min, max);
-    private ensureBoundariesRound(val, min, max);
+    private convertToInputValue;
+    private ensureBoundaries;
+    private ensureBoundariesRound;
 }
