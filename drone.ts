@@ -1,45 +1,42 @@
-declare var require: any;
-
-import { Observable, Subject } from 'rxjs';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
 
 import { MamboUUIDs, DroneCharacteristic } from '.';
-
-const FLIGHT_STATUSES = ['landed', 'taking off', 'hovering', 'flying',
-                         'landing', 'emergency', 'rolling', 'initializing'];
 
 export class Drone  {
   private flightCommandInstructions: DroneCharacteristic;
   private flightParamsInstructions: DroneCharacteristic;
   private flightStatus: BluetoothRemoteGATTCharacteristic;
-  private batteryStatus: BluetoothRemoteGATTCharacteristic;
 
-  private roll: number = 0;
-  private pitch: number = 0;
-  private yaw: number = 0;
-  private altitude: number = 0;
+  public roll: number = 0;
+  public pitch: number = 0;
+  public yaw: number = 0;
+  public altitude: number = 0;
 
   private flightLoopHandle: number = -1;
-
-  // private flightStatusSubject: BehaviorSubject<string>;
-  // private batteryStatusSubject: BehaviorSubject<number>;
 
   private loopHandle: number;
   private ready: boolean = false;
 
-  private connectionSubject: Subject<boolean>;
+  private connectionSubject: BehaviorSubject<boolean>;
 
   get connection$(): Observable<boolean> {
-    return this.connectionSubject;
+    return this.connectionSubject.asObservable();
   }
 
   constructor(private device: BluetoothDevice) {
   }
 
   public async connect(): Promise<any> {
-    this.connectionSubject = new Subject<boolean>();
+    this.connectionSubject = new BehaviorSubject<boolean>(false);
 
+    // [web-ble] Connect to the device
     const server: BluetoothRemoteGATTServer = await this.device.gatt.connect();
 
+    console.log('Drone connected');
+    await this.initialise(server);
+  }
+
+  public async initialise(server: BluetoothRemoteGATTServer) {
     await this.prepareCharacteristics(server);
 
     await this.initialiseFlightDefaults();
@@ -50,17 +47,25 @@ export class Drone  {
     await this.flightStatus.startNotifications();
 
     this.connectionSubject.next(true);
-    console.log('Drone connected and ready to fly');
+    console.log('Drone ready to fly');
   }
 
   private async prepareCharacteristics(server: BluetoothRemoteGATTServer) {
-    const serviceA = await server.getPrimaryService(MamboUUIDs.serviceUUIDa);
-    const serviceB = await server.getPrimaryService(MamboUUIDs.serviceUUIDb);
+    // [web-ble] Get Services
+    const instructionService = await server.getPrimaryService(MamboUUIDs.serviceUUIDa);
+    const notificationService = await server.getPrimaryService(MamboUUIDs.serviceUUIDb);
 
-    this.flightCommandInstructions = new DroneCharacteristic(await serviceA.getCharacteristic(MamboUUIDs.characteristic_command_instructions));
-    this.flightParamsInstructions = new DroneCharacteristic(await serviceA.getCharacteristic(MamboUUIDs.characteristic_flight_params));
+    this.flightCommandInstructions = new DroneCharacteristic(
+      // [web-ble] Get Commands Characteristic
+      await instructionService.getCharacteristic(MamboUUIDs.characteristic_command_instructions)
+    );
 
-    this.flightStatus = await serviceB.getCharacteristic(MamboUUIDs.characteristic_flightStatus);
+    this.flightParamsInstructions = new DroneCharacteristic(
+      // [web-ble] Get Flight Params Characteristic
+      await instructionService.getCharacteristic(MamboUUIDs.characteristic_flight_params)
+    );
+
+    this.flightStatus = await notificationService.getCharacteristic(MamboUUIDs.characteristic_flightStatus);
   }
 
   private async initialiseFlightDefaults(): Promise<any> {
@@ -132,54 +137,10 @@ export class Drone  {
     return this.flightCommandInstructions.write([1, 1, 0, maxRotationSpeed, 0]);
   }
 
-  // listenToFlightStatus() {
-  //   const promise = this.flightStatus.startNotifying();
-
-  //   this.flightStatus.getObservable().subscribe((notificationData: number[]) => {
-  //     this.updateFlightStatus(notificationData);
-  //   });
-
-  //   return promise;
-  // }
-
-  // updateFlightStatus(notificationData: number[]) {
-  //   if (notificationData[2] !== 2) {
-  //     return;
-  //   }
-
-  //   const status = FLIGHT_STATUSES[notificationData[6]];
-  //   this.flightStatusSubject.next(status);
-
-  //   console.log('updateFlightStatus::' + status);
-  // }
-
-  // stopListeningToFlightStatus() {
-  //   this.flightStatus.stopNotifying();
-  // }
-
-  // listenToBatteryStatus() {
-  //   const promise = this.batteryStatus.startNotifying();
-
-  //   this.batteryStatus.getObservable().subscribe((notificationData: number[]) => {
-  //     this.updateBatteryStatus(notificationData);
-  //   });
-
-  //   return promise;
-  // }
-
-  // updateBatteryStatus(notificationData: number[]) {
-  //   const status = notificationData[notificationData.length-1];
-  //   this.batteryStatusSubject.next(status);
-
-  //   console.log('updateBatteryStatus::' + status);
-  // }
-
-  // stopListeningToBatteryStatus() {
-  //   this.batteryStatus.stopNotifying();
-  // }
-
   private startFlightLoop() {
-    this.flightLoopHandle = window.setInterval(() => this.sendFlightParams(), 100);
+    this.flightLoopHandle = window.setInterval(
+      () => this.sendFlightParams(),
+      100);
   }
 
   private stopFlightLoop() {
@@ -189,10 +150,16 @@ export class Drone  {
     }
   }
 
+  /**
+   * Instructs the drone to take off
+   */
   public takeOff() {
     this.flightCommandInstructions.writeWithoutResponse([0, 1, 0]);
   }
 
+  /**
+   * Instructs the drone to land
+   */
   public land() {
     this.flightCommandInstructions.writeWithoutResponse([0, 3, 0]);
 
@@ -209,6 +176,13 @@ export class Drone  {
     this.flightCommandInstructions.writeWithoutResponse([16, 2, 0, 0, 0, 0, 0, 0]);
   }
 
+  /**
+   * Sets the roll, pitch, yaw and altitude of drone's flight params in one call
+   * @param roll turn speed, expected value from -1 (move left) to 1 (move right)
+   * @param pitch turn speed, expected value from -1 (move back) to 1 (move forward)
+   * @param yaw turn speed, expected value from -1 (turn counter-clocwise) to 1 (turn clocwise)
+   * @param altitude turn speed, expected value from -1 (move down) to 1 (move up)
+   */
   private sendFlightParams() {
     const command = [0, 2, 0, 1, this.roll, this.pitch, this.yaw, this.altitude, 0, 0, 0, 0, 0, 0, 0, 0];
     this.flightParamsInstructions.writeWithoutResponse(command);

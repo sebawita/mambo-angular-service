@@ -1,16 +1,64 @@
 <h1>
-  {{title}}
+  Mambo Angular Service Demo
 </h1>
 
-<button (click)="search()">Search</button>
+<button *ngIf="!ready" (click)="search()" class="btn">Search</button>
 
-<button (click)="takeOff()">Take Off</button>
-<button (click)="land()">Land</button>
+<div *ngIf="ready">
+  <button (click)="takeOff()" class="btn">Take Off</button>
+  <button (click)="land()" class="btn">Land</button>
 
-<h1>Speed: {{speed}}</h1>
+  <h1>Speed: {{speed * 100 + '%'}}</h1>
 
-<h3>Roll: {{drone?.roll}}</h3>
-<h3>Pitch: {{drone?.pitch}}</h3>
-<h3>Yaw: {{drone?.yaw}}</h3>
-<h3>Altitude: {{drone?.altitude}}</h3>
+  <h3>Roll: {{drone.roll}}</h3>
+  <h3>Pitch: {{drone.pitch}}</h3>
+  <h3>Yaw: {{drone.yaw}}</h3>
+  <h3>Altitude: {{drone.altitude}}</h3>
 
+  <h4>Keyboard map</h4>
+  <table style="border: 1px solid black">
+    <tr>
+      <th><b>Key</b></th>
+      <th>Action</th>
+      <th><b>Key</b></th>
+      <th>Action</th>
+    </tr>
+    <tr>
+      <td><b>w</b></td>
+      <td>Pitch Forward</td>
+      <td><b>s</b></td>
+      <td>Pitch Back</td>
+    </tr>
+    <tr>
+      <td><b>a</b></td>
+      <td>Roll Left</td>
+      <td><b>d</b></td>
+      <td>Roll Right</td>
+    </tr>
+    <tr>
+      <td><b>&uarr;</b></td>
+      <td>Altitude Up</td>
+      <td><b>&darr;</b></td>
+      <td>Altitude Down</td>
+    </tr>
+    <tr>
+      <td><b>&larr;</b></td>
+      <td>Yaw Left</td>
+      <td><b>&rarr;</b></td>
+      <td>Yaw Right</td>
+    </tr>
+    <tr>
+      <td><b>1</b></td>
+      <td>Speed 25%</td>
+      <td><b>2</b></td>
+      <td>Speed 50%</td>
+    </tr>
+    <tr>
+      <td><b>3</b></td>
+      <td>Speed 75%</td>
+      <td><b>4</b></td>
+      <td>Speed 100%</td>
+    </tr>
+  </table>
+
+</div>

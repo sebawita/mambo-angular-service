@@ -2,33 +2,36 @@ export class DroneCharacteristic {
   private serviceUUID: string;
   private characteristicUUID: string;
 
-  private _steps = 0;
-  private get steps(): number {
-    if (++this._steps > 255) {
-      this._steps = 0;
+  private _step = 0;
+  private nextStep(): number {
+    if (++this._step > 255) {
+      this._step = 0;
     }
 
-    return this._steps;
+    return this._step;
   }
 
-  constructor(private characteristic: BluetoothRemoteGATTCharacteristic) {
+  // constructor(private characteristic: BluetoothRemoteGATTCharacteristic) {
+  constructor(private characteristic: any) {
   }
 
   private prepareBuffer(params: number[]): Uint8Array {
-    const buffer = [2, this.steps, 2].concat(params);
+    const buffer = [2, this.nextStep(), 2, ...params];
 
     return new Uint8Array(buffer);
   }
 
   write(command: number[]): Promise<any> {
     const value = this.prepareBuffer(command);
-
+    
+    // [web-ble] Send command
     return this.characteristic.writeValue(value);
   }
 
   writeWithoutResponse(command: number[]): Promise<any> {
     const value = this.prepareBuffer(command);
 
+    // [web-ble] Send command
     this.characteristic.writeValue(value);
 
     return Promise.resolve();

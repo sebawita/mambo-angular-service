@@ -1,6 +1,5 @@
 import { Component, HostListener } from '@angular/core';
 import { MamboService, Drone } from 'mambo-angular-service';
-// import { Subject } from 'rxjs/Subject';
 
 @Component({
   selector: 'app-root',
@@ -8,8 +7,6 @@ import { MamboService, Drone } from 'mambo-angular-service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app works!';
-
   ready = false;
   drone: Drone;
   speed = 0.5;
@@ -22,112 +19,122 @@ export class AppComponent {
 
     this.drone.connection$
     .subscribe(
-      () => this.ready,
+      () => this.ready = true,
       err => console.error('Something went wrong: ' + JSON.stringify(err)),
       () => {
         alert('Drone is no longer connected');
         this.drone = null;
         this.ready = false;
       }
-    );
-  }
+      );
 
-  @HostListener('window:keydown', ['$event'])
-  keyboardDownInput(event: KeyboardEvent) {
-    if (this.drone) {
-      this.handleKeyDown(event);
+      alert('Ready to fly');
     }
-  }
-  @HostListener('window:keyup', ['$event'])
-  keyboardUpInput(event: KeyboardEvent) {
-    if (this.drone) {
-      this.handleKeyUp(event);
+
+    takeOff() {
+      this.drone.takeOff();
     }
-  }
 
-  takeOff() {
-    this.drone.takeOff();
-  }
+    land() {
+      this.drone.land();
 
-  land() {
-    this.drone.land();
-  }
+    }
 
-  public handleKeyDown(event: KeyboardEvent) {
-    const key = event.key.toLowerCase();
+    @HostListener('window:keydown', ['$event'])
+    keyboardDownInput(event: KeyboardEvent) {
+      if (this.drone) {
+        this.handleKeyDown(event);
+      }
+    }
+    @HostListener('window:keyup', ['$event'])
+    keyboardUpInput(event: KeyboardEvent) {
+      if (this.drone) {
+        this.handleKeyUp(event);
+      }
+    }
 
-    switch (key) {
-      case 'a':
+    public handleKeyDown(event: KeyboardEvent) {
+      const key = event.key.toLowerCase();
+
+      switch (key) {
+        case 'a':
         this.drone.setRoll(-this.speed);
         break;
         case 'd':
         this.drone.setRoll(this.speed);
         break;
-      case 'w':
+        case 'w':
         this.drone.setPitch(this.speed);
         break;
-      case 's':
+        case 's':
         this.drone.setPitch(-this.speed);
         break;
-      case 'l':
+        case 'l':
         this.land();
         break;
-      case 'arrowleft':
+        case 'arrowleft':
         this.drone.setYaw(-1);
         break;
-      case 'arrowright':
+        case 'arrowright':
         this.drone.setYaw(1);
         break;
-      case 'arrowup':
+        case 'arrowup':
         this.drone.setAltitude(this.speed);
         break;
-      case 'arrowdown':
+        case 'arrowdown':
         this.drone.setAltitude(-this.speed);
         break;
+      }
     }
-  }
 
-  public handleKeyUp(event: KeyboardEvent) {
-    const key = event.key.toLowerCase();
+    public handleKeyUp(event: KeyboardEvent) {
+      const key = event.key.toLowerCase();
 
-    switch (key) {
-      case '1':
+      switch (key) {
+        case '1':
         this.speed = 0.25;
         break;
-      case '2':
+        case '2':
         this.speed = 0.5;
         break;
-      case '3':
+        case '3':
         this.speed = 0.75;
         break;
-      case '4':
+        case '4':
         this.speed = 1;
         break;
-      case 't':
+        case 't':
         this.drone.takeOff();
         break;
-      case 'l':
+        case 'l':
         this.drone.land();
         break;
-      case 'a':
-      case 'd':
+        case 'a':
+        case 'd':
         this.drone.setRoll(0);
         break;
-      case 'w':
-      case 's':
+        case 'w':
+        case 's':
         this.drone.setPitch(0);
         break;
-      case 'arrowleft':
-      case 'arrowright':
+        case 'arrowleft':
+        case 'arrowright':
         this.drone.setYaw(0);
         break;
-      case 'arrowup':
-      case 'arrowdown':
+        case 'arrowup':
+        case 'arrowdown':
         this.drone.setAltitude(0);
         break;
-      case 'f':
+        case 'f':
         this.drone.fire();
         break;
+      }
+    }
+
+    async issueCommand() {
+
+      this.drone = await this.mamboService.search();
+      // wait until ready...
+      this.drone.takeOff();
     }
   }
-}

@@ -5,11 +5,10 @@ export declare class Drone {
     private flightCommandInstructions;
     private flightParamsInstructions;
     private flightStatus;
-    private batteryStatus;
-    private roll;
-    private pitch;
-    private yaw;
-    private altitude;
+    roll: number;
+    pitch: number;
+    yaw: number;
+    altitude: number;
     private flightLoopHandle;
     private loopHandle;
     private ready;
@@ -17,10 +16,11 @@ export declare class Drone {
     readonly connection$: Observable<boolean>;
     constructor(device: BluetoothDevice);
     connect(): Promise<any>;
-    private prepareCharacteristics;
-    private initialiseFlightDefaults;
-    private listenToOnDisconnected;
-    private onDisconnected;
+    initialise(server: BluetoothRemoteGATTServer): Promise<void>;
+    private prepareCharacteristics(server);
+    private initialiseFlightDefaults();
+    private listenToOnDisconnected();
+    private onDisconnected();
     /**
      * Convenience method for setting the drone's altitude limitation
      * @param  {Integer} altitude the altitude in meters (2m-10m for Airborne Cargo / 2m - 25m for Mambo)
@@ -41,15 +41,28 @@ export declare class Drone {
      * @param  {integer} tilt The max rotation speed from (50°-360° for Airborne Cargo / 50° - 180° for Mambo)
      */
     setMaxRotationSpeed(maxRotationSpeed: number): Promise<any>;
-    private startFlightLoop;
-    private stopFlightLoop;
+    private startFlightLoop();
+    private stopFlightLoop();
+    /**
+     * Instructs the drone to take off
+     */
     takeOff(): void;
+    /**
+     * Instructs the drone to land
+     */
     land(): void;
     /**
      * Instructs the drone to fire the cannon
      */
     fire(): void;
-    private sendFlightParams;
+    /**
+     * Sets the roll, pitch, yaw and altitude of drone's flight params in one call
+     * @param roll turn speed, expected value from -1 (move left) to 1 (move right)
+     * @param pitch turn speed, expected value from -1 (move back) to 1 (move forward)
+     * @param yaw turn speed, expected value from -1 (turn counter-clocwise) to 1 (turn clocwise)
+     * @param altitude turn speed, expected value from -1 (move down) to 1 (move up)
+     */
+    private sendFlightParams();
     updateFlightParams(roll: number, pitch: number, yaw: number, altitude: number): void;
     /**
      * Sets the roll speed of drone's flight params
@@ -71,7 +84,7 @@ export declare class Drone {
      * @param altitude turn speed, expected value from -1 (move down) to 1 (move up)
      */
     setAltitude(altitude: any): void;
-    private convertToInputValue;
-    private ensureBoundaries;
-    private ensureBoundariesRound;
+    private convertToInputValue(value);
+    private ensureBoundaries(val, min, max);
+    private ensureBoundariesRound(val, min, max);
 }
