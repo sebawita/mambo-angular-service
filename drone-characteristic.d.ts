@@ -6,7 +6,7 @@ export declare class DroneCharacteristic {
     private _steps;
     private readonly steps;
     constructor(characteristic: BluetoothRemoteGATTCharacteristic);
-    private prepareBuffer(params);
+    private prepareBuffer;
     write(command: number[]): Promise<any>;
     writeWithoutResponse(command: number[]): Promise<any>;
 }

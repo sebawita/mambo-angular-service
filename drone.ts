@@ -179,7 +179,7 @@ export class Drone  {
   // }
 
   private startFlightLoop() {
-    this.flightLoopHandle = setInterval(() => this.sendFlightParams(), 100);
+    this.flightLoopHandle = window.setInterval(() => this.sendFlightParams(), 100);
   }
 
   private stopFlightLoop() {
